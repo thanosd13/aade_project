@@ -56,7 +56,7 @@ controller.createNew = async function (req, res) {
             },
         });
     if (checkData.length > 0) {
-        res.status(500).json({ message: "username has already in use" });
+        res.status(409).json({ message: "username has already in use" });
     } else {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         await model.user
@@ -69,17 +69,18 @@ controller.createNew = async function (req, res) {
         return res.status(201).json({user: req.body.username, role: 1});
     }
     } catch (error) {
-        res.status(404).json({ message: error });
+        res.status(500).json({ message: error });
     }
 };
 
 // login function
 controller.login = async function (req, res) {
     try {
+        console.log(req.body);
         // Use findOne to get a single user
         const user = await model.user.findOne({
             where: {
-              username: req.body.username
+              username: req.body.formData.email
             }
         });
 
@@ -88,12 +89,12 @@ controller.login = async function (req, res) {
         }
 
         // Corrected bcrypt.compare to compare password from request and user's stored hashed password
-        const passwordMatch = await bcrypt.compare(req.body.password, user.password); // assuming the password field is named 'password'
+        const passwordMatch = await bcrypt.compare(req.body.formData.password, user.password); // assuming the password field is named 'password'
         if(!passwordMatch) {
             return res.status(401).json({message: 'Authentication failed!'});
         }
         const token = jwt.sign({ id: user.id, username: user.username }, 'VbhxvsSEON', { expiresIn: '1000h' });
-        return res.status(200).json({message: 'success!', token: token});
+        return res.status(200).json({user: user, token: token});
         
     } catch(error) {
         res.status(404).json({message: error.message || "Error occurred"});

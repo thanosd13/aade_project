@@ -1,61 +1,61 @@
-const http = require('http');
 const axios = require('axios');
+const xml2js = require('xml2js');
+const parser = new xml2js.Parser();
 
-const port = 3001;
-
-// Το URL του web service
 const url = 'https://www1.gsis.gr/wsaade/RgWsPublic2/RgWsPublic2';
 
-// Το SOAP μήνυμα
-const getSoapMessage = (username, password) => `<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" xmlns:ns1="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:ns2="http://rgwspublic2/RgWsPublic2Service" xmlns:ns3="http://rgwspublic2/RgWsPublic2">
-<env:Header>
-<ns1:Security>
-<ns1:UsernameToken>
-<ns1:Username>THANOS-1310</ns1:Username>
-<ns1:Password>Panathinaikos1310!</ns1:Password>
-</ns1:UsernameToken>
-</ns1:Security>
-</env:Header>
-<env:Body>
-<ns2:rgWsPublic2AfmMethod>
-<ns2:INPUT_REC>
-<ns3:afm_called_by/>
-<ns3:afm_called_for>158537294</ns3:afm_called_for>
-<ns3:as_on_date>2021-07-01</ns3:as_on_date>
-</ns2:INPUT_REC>
-</ns2:rgWsPublic2AfmMethod>
-</env:Body>
-</env:Envelope>`; 
+// Helper function to construct SOAP message
+const getSoapMessage = (afm) => {
+    return `<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" xmlns:ns1="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:ns2="http://rgwspublic2/RgWsPublic2Service" xmlns:ns3="http://rgwspublic2/RgWsPublic2">
+        <env:Header>
+            <ns1:Security>
+                <ns1:UsernameToken>
+                    <ns1:Username>${process.env.MHTRWO_USERNAME}</ns1:Username>
+                    <ns1:Password>${process.env.MHTRWO_PASSWORD}</ns1:Password>
+                </ns1:UsernameToken>
+            </ns1:Security>
+        </env:Header>
+        <env:Body>
+            <ns2:rgWsPublic2AfmMethod>
+                <ns2:INPUT_REC>
+                    <ns3:afm_called_for>${afm}</ns3:afm_called_for>
+                    <ns3:as_on_date>2021-07-01</ns3:as_on_date>
+                </ns2:INPUT_REC>
+            </ns2:rgWsPublic2AfmMethod>
+        </env:Body>
+    </env:Envelope>`;
+};
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/getAfmDetails' && req.method === 'GET') {
-    const username = '';
-    const password = 'PANATHINAIKOS131096-';
-
-    const soapMessage = getSoapMessage(username, password);
-
-    const config = {
-      headers: {
-        'Content-Type': 'application/soap+xml; charset=utf-8',
-      },
-    };
-
-    axios.post(url, soapMessage, config)
-      .then(response => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(response.data));
-      })
-      .catch(error => {
-        console.error('Error:', error.response ? error.response.data : error.message);
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('SOAP method call failed');
-      });
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
+async function handleSoapResponse(xml) {
+  try {
+      const result = await parser.parseStringPromise(xml);
+      const basicInfo = result['env:Envelope']['env:Body'][0]['srvc:rgWsPublic2AfmMethodResponse'][0]['srvc:result'][0]['rg_ws_public2_result_rtType'][0]['basic_rec'][0];
+      const firmActTab = result['env:Envelope']['env:Body'][0]['srvc:rgWsPublic2AfmMethodResponse'][0]['srvc:result'][0]['rg_ws_public2_result_rtType'][0]['firm_act_tab'][0]['item'][0];
+      
+      // Appending first item from firm_act_tab to basicInfo
+      basicInfo['firm_act'] = {
+          firm_act_descr: firmActTab['firm_act_descr'][0],
+      };      
+      return basicInfo;
+      } catch (err) {
+      throw err; 
   }
-});
+}
 
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// Function to call SOAP API
+const callSoap = async (afm) => {
+    const soapMessage = getSoapMessage(afm);
+    try {
+        const response = await axios.post(process.env.SOAP_ENDPOINT, soapMessage, {
+            headers: {'Content-Type': 'application/soap+xml; charset=utf-8'}
+        });
+        const data = handleSoapResponse(response.data);
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+module.exports = { callSoap };

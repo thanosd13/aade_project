@@ -2,16 +2,22 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const cors = require('cors');
 const app = express();
 const userRoute = require("./routes/userRoutes");
+const customerRoute = require("./routes/customerRoutes");
 const authToken = require("./middleware/auth");
+require('dotenv').config();
+
 
 // setting middleware
 app.use(morgan("dev"));
+app.use(cors());
 app.use(authToken);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/user", userRoute);
+app.use("/customer", customerRoute);
 // setting error path
 app.use((req, res, next) => {
     const err = new Error(`${req.url} not found in this server`);
