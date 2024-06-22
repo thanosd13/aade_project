@@ -65,7 +65,7 @@ controller.createNew = async function (req, res) {
             password: hashedPassword,
             role: 1
         })
-        const sendMail = await sendEmail();
+        await sendEmail();
         return res.status(201).json({user: req.body.username, role: 1});
     }
     } catch (error) {

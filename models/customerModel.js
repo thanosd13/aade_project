@@ -16,18 +16,12 @@ var customer = db.define(
         country: { type: sequelize.STRING },
         city: { type: sequelize.STRING },
         address: { type: sequelize.STRING },
-        street_number: { type: sequelize.INTEGER },
-        postal_code: {type: sequelize.INTEGER},
+        street_number: { type: sequelize.STRING },
+        postal_code: {type: sequelize.STRING},
         doy: { type: sequelize.STRING },
         work: { type: sequelize.STRING },
         email: { type: sequelize.STRING },
-        tel_number:  {
-            type: sequelize.STRING,
-            allowNull: false,     // Ensures each AFM is unique
-            validate: {
-                notEmpty: { msg: "Telephone number must not be empty" }  // Ensures AFM is not an empty string
-            }
-        },
+        tel_number:  { type: sequelize.STRING },
         userId: { type: sequelize.INTEGER, allowNull: false, references: { model: 'user', key: 'id' } }
     },
     {
