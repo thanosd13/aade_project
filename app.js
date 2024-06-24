@@ -6,6 +6,7 @@ const cors = require('cors');
 const app = express();
 const userRoute = require("./routes/userRoutes");
 const customerRoute = require("./routes/customerRoutes");
+const productRoute = require("./routes/productRoutes");
 const authToken = require("./middleware/auth");
 require('dotenv').config();
 
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/user", userRoute);
 app.use("/customer", customerRoute);
+app.use("/product", productRoute);
 // setting error path
 app.use((req, res, next) => {
     const err = new Error(`${req.url} not found in this server`);

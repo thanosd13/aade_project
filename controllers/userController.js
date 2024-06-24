@@ -154,4 +154,64 @@ controller.deleteUser = async function (req, res) {
     }
 };
 
+
+//insert user data
+controller.insertUserData = async function (req, res) {
+    try {
+        await model.userData.create({
+            afm: req.body.formData.afm,
+            name: req.body.formData.name,
+            country: req.body.formData.country,
+            city: req.body.formData.city,
+            address: req.body.formData.address,
+            street_number: req.body.formData.street_number,
+            postal_code: req.body.formData.postal_code,
+            doy: req.body.formData.doy,
+            work: req.body.formData.work,
+            email: req.body.formData.email,
+            tel_number: req.body.formData.tel_number,
+            userId: req.params.userId
+        })
+        return res.status(201).send();
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
+}
+
+//find user data
+controller.findUserData = async function (req, res) {
+    try {
+        const userData = await model.userData.findAll();
+        return res.status(200).json(userData);
+    } catch (error) {
+        res.status(500).json({message:error});
+    }
+}
+
+//update user data
+controller.updateUserData = async function (req, res) {
+
+    const userDataId = req.params.id;
+
+    try {
+        await model.userData.update({
+            afm: formData.afm,
+            name: formData.name,
+            country: formData.country,
+            city: formData.city,
+            address: formData.address,
+            street_number: formData.street_number,
+            postal_code: formData.postal_code,
+            doy: formData.doy,
+            work: formData.work,
+            email: formData.email,
+            tel_number: formData.tel_number
+        },{
+            where: { id: userDataId }
+        })
+    } catch (error) {
+        return res.status(500).send({ error: 'Error updating user data: ' + error.message });
+    }
+}
+
 module.exports = controller;

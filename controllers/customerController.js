@@ -1,4 +1,3 @@
-const { where } = require("sequelize");
 const model = require("../models/customerModel");
 const getUserIdFromToken = require("../generic/getByToken");
 const afmService = require("../services/afmService");
@@ -34,7 +33,7 @@ controller.updateCustomer = async function(req, res) {
     const formData = req.body.formData; 
     const idFromToken = getUserIdFromToken(req.headers.authorization?.split(" ")[1]);
     const userId = req.body.formData.userId;
-    
+
     if(userId != idFromToken) {
         return res.status(401).json({message: "Unathorized user!"});
     }
