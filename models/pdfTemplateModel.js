@@ -4,11 +4,14 @@ var pdfTemplateDataModel = db.define(
     "pdfTemplateData",
     {
         id: { type: sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-        logoImage: { type: sequelize.BLOB, allowNull: true },
+        logoImage: { type: sequelize.BLOB('long'), allowNull: true }, // Changed to LONGBLOB
         firstColor: { type: sequelize.STRING, allowNull:true },
         secondColor: { type: sequelize.STRING, allowNull:true },
         textSize: { type: sequelize.STRING, allowNull: true },
+        logoSize: { type: sequelize.STRING, allowNull: true },
+        notes: { type: sequelize.STRING, allowNull: true },
         userId: { type: sequelize.INTEGER, allowNull: false, references: { model: 'user', key: 'id' } }
+
     },
     {
         // freeze name table not using *s on name
