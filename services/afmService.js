@@ -49,6 +49,7 @@ const callSoap = async (afm) => {
         const response = await axios.post(process.env.SOAP_ENDPOINT, soapMessage, {
             headers: {'Content-Type': 'application/soap+xml; charset=utf-8'}
         });
+        console.log(response);
         const data = handleSoapResponse(response.data);
         console.log(data);
         return data;

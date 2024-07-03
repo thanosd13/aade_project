@@ -1,8 +1,10 @@
 const userController = require("./userController");
 const customerController = require("./customerController");
 const productController = require("./productController");
+const pdfController = require("./pdfController");
 var controllers = {};
 controllers.user = userController;
 controllers.customer = customerController;
 controllers.product = productController;
+controllers.pdfController = pdfController;
 module.exports = controllers;

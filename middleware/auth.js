@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
 
-    if(req.path === '/user/login' || req.path === '/user/register') {
+    if(req.path === '/user/login' || req.path === '/user/register' || req.path === '/user/pdf/create') {
         return next();
     }
 

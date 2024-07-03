@@ -2,7 +2,8 @@ const db = require("../config/database");
 const userModel = require("./userModel");
 const customerModel = require("./customerModel");
 const productModel = require("./productModel");
-const userDataModel = require("./userDataModel")
+const userDataModel = require("./userDataModel");
+const pdfTemplateDataModel = require("./pdfTemplateModel");
 const model = {};
 
 db.authenticate()
@@ -17,6 +18,9 @@ productModel.belongsTo(userModel, { foreignKey: 'userId' });
 
 userModel.hasOne(userDataModel, { foreignKey: 'userId' });
 userDataModel.belongsTo(userModel, { foreignKey: 'userId' });
+
+userModel.hasOne(userDataModel, { foreignKey: 'userId' });
+pdfTemplateDataModel.belongsTo(userModel, { foreignKey: 'userId' });
 
 db.sync()
     .then(() => console.log('User table has been successfully created or updated, if it does not exist or needs alteration'))

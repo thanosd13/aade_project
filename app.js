@@ -7,6 +7,7 @@ const app = express();
 const userRoute = require("./routes/userRoutes");
 const customerRoute = require("./routes/customerRoutes");
 const productRoute = require("./routes/productRoutes");
+const pdfRoute = require("./routes/pdfRoutes");
 const authToken = require("./middleware/auth");
 require('dotenv').config();
 
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 app.use("/user", userRoute);
 app.use("/customer", customerRoute);
 app.use("/product", productRoute);
+app.use("/pdf", pdfRoute);
 // setting error path
 app.use((req, res, next) => {
     const err = new Error(`${req.url} not found in this server`);

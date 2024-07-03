@@ -1,9 +1,11 @@
 const model = require("../models/index");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sendEmail = require("../generic/emailFunc");
 const { user } = require("./indexController");
+const { createPdf } = require("../generic/pdf/generate");
+const {createInvoice} = require("../generic/pdf/generate");
 const controller = {};
 
 
@@ -157,20 +159,21 @@ controller.deleteUser = async function (req, res) {
 
 //insert user data
 controller.insertUserData = async function (req, res) {
+    
     try {
         await model.userData.create({
-            afm: req.body.formData.afm,
-            name: req.body.formData.name,
-            country: req.body.formData.country,
-            city: req.body.formData.city,
-            address: req.body.formData.address,
-            street_number: req.body.formData.street_number,
-            postal_code: req.body.formData.postal_code,
-            doy: req.body.formData.doy,
-            work: req.body.formData.work,
-            email: req.body.formData.email,
-            tel_number: req.body.formData.tel_number,
-            userId: req.params.userId
+            afm: req.body.afm,
+            name: req.body.name,
+            country: req.body.country,
+            city: req.body.city,
+            address: req.body.address,
+            street_number: req.body.street_number,
+            postal_code: req.body.postal_code,
+            doy: req.body.doy,
+            work: req.body.work,
+            email: req.body.email,
+            tel_number: req.body.tel_number,
+            userId: req.params.id
         })
         return res.status(201).send();
     } catch (error) {
@@ -180,11 +183,17 @@ controller.insertUserData = async function (req, res) {
 
 //find user data
 controller.findUserData = async function (req, res) {
+    const userId = req.params.id;
     try {
-        const userData = await model.userData.findAll();
+        const userData = await model.userData.findAll({
+            where: { userId: userId }
+        });
+        if(userData.length < 1) {
+            return res.status(404).send();
+        }
         return res.status(200).json(userData);
     } catch (error) {
-        res.status(500).json({message:error});
+        return res.status(500).json({message:error});
     }
 }
 
@@ -192,6 +201,7 @@ controller.findUserData = async function (req, res) {
 controller.updateUserData = async function (req, res) {
 
     const userDataId = req.params.id;
+    const formData = req.body;
 
     try {
         await model.userData.update({
@@ -209,9 +219,48 @@ controller.updateUserData = async function (req, res) {
         },{
             where: { id: userDataId }
         })
+        return res.status(200).send();
     } catch (error) {
         return res.status(500).send({ error: 'Error updating user data: ' + error.message });
     }
 }
+
+controller.createInvoice = function (req, res) {
+    const invoice = {
+        shipping: {
+            name: 'John Doe',
+            address: '1234 Main Street',
+            city: 'San Francisco',
+            state: 'CA',
+            country: 'US',
+            postal_code: 94111,
+        },
+        items: [
+            {
+                item: 'TC 100',
+                description: 'Toner Cartridge',
+                quantity: 2,
+                amount: 6000,
+            },
+            {
+                item: 'USB_EXT',
+                description: 'USB Cable Extender',
+                quantity: 1,
+                amount: 2000,
+            },
+        ],
+        subtotal: 8000,
+        paid: 0,
+        invoice_nr: 1234,
+    };
+
+    try {
+        createInvoice(invoice, 'invoice.pdf');
+        res.status(200).json({ message: "Invoice created successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating invoice", error: error.message });
+    }
+};
+
 
 module.exports = controller;

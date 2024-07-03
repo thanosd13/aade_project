@@ -19,7 +19,7 @@ var customer = db.define(
         street_number: { type: sequelize.STRING },
         postal_code: {type: sequelize.STRING},
         doy: { type: sequelize.STRING },
-        work: { type: sequelize.STRING },
+        work: { type: sequelize.STRING(600) },
         email: { type: sequelize.STRING },
         tel_number:  { type: sequelize.STRING },
         userId: { type: sequelize.INTEGER, allowNull: false, references: { model: 'user', key: 'id' } }
