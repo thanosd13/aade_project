@@ -4,7 +4,6 @@ const controller = require("../controllers/indexController");
 router.get("/", controller.user.getAll);
 router.get("/:username", controller.user.getUsername);
 router.get("/userData/:id", controller.user.findUserData);
-router.get("/pdf/create", controller.user.createInvoice);
 router.post("/register", controller.user.createNew);
 router.post("/login", controller.user.login);
 router.post("/createUserData/:id", controller.user.insertUserData);

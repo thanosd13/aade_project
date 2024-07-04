@@ -8,6 +8,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post("/:id", upload.single('logoImage'), controller.pdfController.insertPdfTemplateData);
+router.post("/create/:id", controller.pdfController.createInvoice);
 router.put("/:id", upload.single('logoImage'), controller.pdfController.updatePdfTemplateData);
 router.get("/:id", controller.pdfController.getPdfTemplateDataByUserId);
 router.get("/image/:id", controller.pdfController.getImageByUserId);

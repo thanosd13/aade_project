@@ -31,4 +31,5 @@ model.user = userModel;
 model.customer = customerModel;
 model.product = productModel;
 model.userData = userDataModel;
+model.pdfData = pdfTemplateDataModel;
 module.exports = model;

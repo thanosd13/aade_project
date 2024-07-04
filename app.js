@@ -8,7 +8,6 @@ const productRoute = require("./routes/productRoutes");
 const pdfRoute = require("./routes/pdfRoutes");
 const authToken = require("./middleware/auth");
 require('dotenv').config();
-const multer = require('multer');
 
 // Using Morgan for logging
 app.use(morgan("dev"));
