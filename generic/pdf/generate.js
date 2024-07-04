@@ -33,15 +33,17 @@ function generateHeader(doc, invoice, size = 7) {
 
     
     // Add the image to the document
-    doc.image(logoImage, 50, 45, { width: 50 });
+    doc
+      .image(logoImage, 50, 45, { width: invoice.pdfTemplateData.logoSize*6, height: invoice.pdfTemplateData.logoSize*6 });
+       
   } catch (error) {
     console.error('Error processing logo image:', error);
   }
 
   doc
-    .fillColor("#444444")
+    .fillColor(invoice.pdfTemplateData.firstColor)
     .font(fontPathBold)
-    .fontSize(size)
+    .fontSize(invoice.pdfTemplateData.textSize)
     .text(invoice.userData.name, 200, 50, { align: "right" })
     .text(invoice.userData.address + " " + invoice.userData.street_number, 200, 65, { align: "right" })
     .text("ΑΦΜ: " + invoice.userData.afm + ", " + "ΔΟΥ: " + invoice.userData.doy, 200, 80, { align: "right" })
@@ -51,11 +53,12 @@ function generateHeader(doc, invoice, size = 7) {
 
 function generateCustomerInformation(doc, invoice) {
   doc
-    .fillColor("#444444")
+    .fillColor(invoice.pdfTemplateData.firstColor)
     .fontSize(15)
     .font(fontPathBold)
     .text("Τιμολόγιο", 50, 160)
     .fontSize(14)
+    .fillColor("#444444")
     .font(fontPathItalic)
     .text(getCurrentDateFormatted(), 50, 165, { align: "right" });
 
@@ -64,6 +67,7 @@ function generateCustomerInformation(doc, invoice) {
   const customerInformationTop = 200;
 
   doc
+    .fillColor(invoice.pdfTemplateData.secondColor)
     .fontSize(9)
     .font(fontPath)
     .text("Επωνυμία:", 50, customerInformationTop)
@@ -126,6 +130,7 @@ function generateInvoiceTable(doc, invoice) {
   let i;
   const invoiceTableTop = 330;
   doc.font(fontPathBold)
+  .fillColor(invoice.pdfTemplateData.firstColor)
   generateTableRow(
     doc,
     invoiceTableTop,
@@ -139,24 +144,26 @@ function generateInvoiceTable(doc, invoice) {
   generateHr(doc, 570, invoiceTableTop + 20);
   doc.font(fontPath);
 
-  for (i = 0; i < invoice.items.length; i++) {
-    const item = invoice.items[i];
+  for (i = 0; i < invoice.products.products.length; i++) {
+    const item = invoice.products.products[i];
     const position = invoiceTableTop + (i + 1) * 30;
+    doc.fillColor(invoice.pdfTemplateData.secondColor)
     generateTableRow(
       doc,
       position,
-      item.item,
-      item.quantity,
-      "τεμ.",
-      "200€",
-      "24%",
-      "300€",
+      item.name,
+      "2",
+      item.type,
+      item.price,
+      item.fpa,
+      item.final_price,
     );
 
     generateHr(doc, 570, position + 20);
   }
 
   const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+  doc.fillColor("#444444")
   generateTableRow(
     doc,
     subtotalPosition,
@@ -211,7 +218,7 @@ function generateTableRow(
   unitCost,
   quantity,
   lineTotal,
-  finalPrice // Add the new parameter here
+  finalPrice
 ) {
   doc
     .fontSize(10)

@@ -108,7 +108,7 @@ controller.createInvoice = async function (req, res) {
                 ...customerData
             },
             products: {
-                ...products
+                products
             },
             items: [
                 {
@@ -139,5 +139,7 @@ controller.createInvoice = async function (req, res) {
         res.status(500).json({ message: "Error creating invoice", error: error.message });
     }
 };
+
+
 
 module.exports = controller;
