@@ -1,5 +1,6 @@
 const model = require("../models/index");
 const { createInvoice } = require("../generic/pdf/generate");
+const { where } = require("sequelize");
 
 const controller = {};
 
@@ -182,6 +183,38 @@ controller.createInvoice = async function (req, res) {
     res
       .status(500)
       .json({ message: "Error creating invoice", error: error.message });
+  }
+};
+
+controller.getAllInvoicesByUserId = async function (req, res) {
+  try {
+    const invoices = await model.invoice.findAll({
+      where: { userId: req.params.id },
+      include: [
+        {
+          model: model.invoicePdf,
+          attributes: ["id", "invoice_id"],
+        },
+      ],
+    });
+    res.status(200).json(invoices);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching invoices", error: error.message });
+  }
+};
+
+controller.getPdfByInvoiceId = async function (req, res) {
+  try {
+    const pdf = await model.invoicePdf.findAll({
+      where: { invoice_id: req.params.id },
+    });
+    res.status(200).json(pdf);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching pdf", error: error.message });
   }
 };
 

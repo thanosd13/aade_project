@@ -326,7 +326,7 @@ function getFirstThreeWords(str) {
 }
 
 function getPaymentWayText(value) {
-  return paymentWayMapping[value] || "Άγνωστος τρόπος πληρωμής";
+  return paymentWayMapping[value] || "";
 }
 
 function getInvoiceTypeText(value) {
