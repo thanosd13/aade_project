@@ -164,7 +164,7 @@ controller.createInvoice = async function (req, res) {
             "attachment; filename=invoice.pdf"
           );
           res.setHeader("Content-Type", "application/pdf");
-          return res.send(pdfData);
+          return res.status(201).send(pdfData);
         } catch (error) {
           return res.status(400).send({
             error: "Error creating invoice and PDF: " + error.message,
@@ -190,13 +190,9 @@ controller.getAllInvoicesByUserId = async function (req, res) {
   try {
     const invoices = await model.invoice.findAll({
       where: { userId: req.params.id },
-      include: [
-        {
-          model: model.invoicePdf,
-          attributes: ["id", "invoice_id"],
-        },
-      ],
     });
+    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+    res.setHeader("Content-Type", "application/pdf");
     res.status(200).json(invoices);
   } catch (error) {
     res
@@ -208,9 +204,11 @@ controller.getAllInvoicesByUserId = async function (req, res) {
 controller.getPdfByInvoiceId = async function (req, res) {
   try {
     const pdf = await model.invoicePdf.findAll({
-      where: { invoice_id: req.params.id },
+      where: { invoice_id: req.params.documentId },
     });
-    res.status(200).json(pdf);
+    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.status(200).send(pdf[0].dataValues.pdf_data);
   } catch (error) {
     res
       .status(500)

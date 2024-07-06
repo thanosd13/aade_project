@@ -6,6 +6,7 @@ const userDataModel = require("./userDataModel");
 const pdfTemplateDataModel = require("./pdfTemplateModel");
 const invoiceModel = require("./invoiceModel");
 const invoicePdfModel = require("./invoicePdfModel");
+const aadeDataModel = require("./aadeDataModel");
 const model = {};
 
 db.authenticate()
@@ -32,6 +33,9 @@ invoiceModel.belongsTo(userModel, { foreignKey: "userId" });
 invoiceModel.hasOne(invoicePdfModel, { foreignKey: "invoice_id" });
 invoicePdfModel.belongsTo(invoiceModel, { foreignKey: "invoice_id" });
 
+userModel.hasOne(aadeDataModel, { foreignKey: "userId" });
+aadeDataModel.belongsTo(userModel, { foreignKey: "userId" });
+
 db.sync()
   .then(() =>
     console.log(
@@ -47,4 +51,5 @@ model.userData = userDataModel;
 model.pdfData = pdfTemplateDataModel;
 model.invoice = invoiceModel;
 model.invoicePdf = invoicePdfModel;
+model.aadeData = aadeDataModel;
 module.exports = model;

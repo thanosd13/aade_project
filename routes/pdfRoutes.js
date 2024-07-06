@@ -21,5 +21,9 @@ router.put(
 router.get("/:id", controller.pdfController.getPdfTemplateDataByUserId);
 router.get("/image/:id", controller.pdfController.getImageByUserId);
 router.get("/invoices/:id", controller.pdfController.getAllInvoicesByUserId);
+router.get(
+  "/document/:id/:documentId",
+  controller.pdfController.getPdfByInvoiceId
+);
 
 module.exports = router;
