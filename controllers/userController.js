@@ -3,7 +3,6 @@ const { Op, where } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../generic/emailFunc");
-const { createInvoice } = require("../generic/pdf/generate");
 const controller = {};
 
 // find all users

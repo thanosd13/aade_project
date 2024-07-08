@@ -1,6 +1,6 @@
 const model = require("../models/index");
 const { createInvoice } = require("../generic/pdf/generate");
-const { where } = require("sequelize");
+const { sendInvoice } = require("../services/sendInvoiceService");
 
 const controller = {};
 
@@ -153,6 +153,10 @@ controller.createInvoice = async function (req, res) {
             my_data_code: informations.my_data,
             userId: userId,
           });
+
+          if (informations.my_data) {
+            sendInvoice(userId);
+          }
 
           await model.invoicePdf.create({
             invoice_id: newInvoice.id,
