@@ -12,6 +12,8 @@ var invoice = db.define(
     fpa: { type: sequelize.STRING },
     total_price: { type: sequelize.STRING },
     my_data_code: { type: sequelize.STRING },
+    invoice_serie: { type: sequelize.STRING },
+    serial_number: { type: sequelize.STRING },
     userId: {
       type: sequelize.INTEGER,
       allowNull: false,

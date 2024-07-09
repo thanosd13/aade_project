@@ -1,3 +1,4 @@
+const sequelize = require("sequelize"); // Import Sequelize
 const model = require("../models/index");
 const { createInvoice } = require("../generic/pdf/generate");
 const { sendInvoice } = require("../services/sendInvoiceService");
@@ -147,10 +148,12 @@ controller.createInvoice = async function (req, res) {
             published_date: customerData.date,
             afm: customerData.afm,
             invoice_type: informations.invoice_type,
-            price: totalPrice,
-            fpa: totalFpa,
-            total_price: totalFinalPrice,
+            price: totalPrice.toFixed(2),
+            fpa: totalFpa.toFixed(2),
+            total_price: totalFinalPrice.toFixed(2),
             my_data_code: informations.my_data,
+            invoice_serie: informations.invoice_serie,
+            serial_number: informations.serial_number,
             userId: userId,
           });
 
@@ -202,6 +205,45 @@ controller.getAllInvoicesByUserId = async function (req, res) {
     res
       .status(500)
       .json({ message: "Error fetching invoices", error: error.message });
+  }
+};
+
+controller.getMaxSerialNumberBySerieAndUserId = async function (req, res) {
+  try {
+    // Find the maximum serial_number for the given invoice_serie and userId
+    const maxSerialNumber = await model.invoice.max("serial_number", {
+      where: {
+        invoice_serie: req.body.serie,
+        userId: req.params.id,
+      },
+    });
+
+    return res.status(200).json({ message: "success", data: maxSerialNumber });
+  } catch (error) {
+    console.error("Error fetching max serial_number: ", error);
+    throw error;
+  }
+};
+
+controller.getInvoiceSeriesByUserId = async function (req, res) {
+  try {
+    // Find all unique invoice_series for the given userId
+    const invoices = await model.invoice.findAll({
+      attributes: [
+        [
+          sequelize.fn("DISTINCT", sequelize.col("invoice_serie")),
+          "invoice_serie",
+        ],
+      ], // Use DISTINCT to get unique values
+      where: {
+        userId: req.params.id,
+      },
+    });
+
+    return res.status(200).json({ message: "success", data: invoices });
+  } catch (error) {
+    console.error("Error fetching invoice_serie by userId: ", error);
+    return res.status(500).send(error);
   }
 };
 
