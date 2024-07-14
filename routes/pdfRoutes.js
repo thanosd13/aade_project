@@ -26,6 +26,11 @@ router.get("/:id", controller.pdfController.getPdfTemplateDataByUserId);
 router.get("/image/:id", controller.pdfController.getImageByUserId);
 router.get("/invoices/:id", controller.pdfController.getAllInvoicesByUserId);
 router.get("/series/:id", controller.pdfController.getInvoiceSeriesByUserId);
+router.get("/getMarks/:id", controller.pdfController.getAllMarksByUserId);
+router.get(
+  "/getCustomerByMark/:mark",
+  controller.pdfController.getAfmByInvoiceMark
+);
 router.get(
   "/document/:id/:documentId",
   controller.pdfController.getPdfByInvoiceId

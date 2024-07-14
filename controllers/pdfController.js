@@ -2,6 +2,7 @@ const sequelize = require("sequelize"); // Import Sequelize
 const model = require("../models/index");
 const { createInvoice } = require("../generic/pdf/generate");
 const { sendInvoice } = require("../services/sendInvoiceService");
+const { dash } = require("pdfkit");
 
 const controller = {};
 
@@ -157,14 +158,31 @@ controller.createInvoice = async function (req, res) {
             userId: userId,
           });
 
-          if (informations.my_data) {
-            sendInvoice(userId);
-          }
-
           await model.invoicePdf.create({
             invoice_id: newInvoice.id,
             pdf_data: pdfData,
           });
+
+          if (informations.my_data) {
+            const sendInvoiceResponse = await sendInvoice(
+              newInvoice.id,
+              userId,
+              invoice.userData.afm,
+              informations.invoice_serie,
+              informations.serial_number,
+              customerData,
+              products,
+              informations.invoice_type,
+              informations.invoice_mark
+            );
+
+            res.setHeader(
+              "Content-Disposition",
+              "attachment; filename=invoice.pdf"
+            );
+            res.setHeader("Content-Type", "application/pdf");
+            return res.status(sendInvoiceResponse.status).send(pdfData);
+          }
 
           res.setHeader(
             "Content-Disposition",
@@ -254,11 +272,57 @@ controller.getPdfByInvoiceId = async function (req, res) {
     });
     res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
     res.setHeader("Content-Type", "application/pdf");
-    res.status(200).send(pdf[0].dataValues.pdf_data);
+    return res.status(200).send(pdf[0].dataValues.pdf_data);
   } catch (error) {
-    res
+    return res
       .status(500)
       .json({ message: "Error fetching pdf", error: error.message });
+  }
+};
+
+controller.getAllMarksByUserId = async function (req, res) {
+  try {
+    const result = await model.myDataNewInvoice.findAll({
+      where: { userId: req.params.id },
+    });
+
+    return res.status(200).json({ message: "success", data: result });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching marks", error: error.message });
+  }
+};
+
+controller.getAfmByInvoiceMark = async function (req, res) {
+  try {
+    const result = await model.myDataNewInvoice.findOne({
+      where: { invoice_mark: req.params.mark },
+    });
+
+    if (result && result.dataValues) {
+      try {
+        const invoice = await model.invoice.findOne({
+          where: { id: result.dataValues.invoice_id },
+        });
+
+        if (invoice) {
+          const customer = await model.customer.findOne({
+            where: { afm: invoice.dataValues.afm },
+          });
+          return res.status(200).json({ message: "success", data: customer });
+        }
+      } catch (error) {
+        return res.status.json({
+          message: "Error fetching customer",
+          error: error.message,
+        });
+      }
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching afm", error: error.message });
   }
 };
 

@@ -1,21 +1,39 @@
-function xmlAPY(vatNumber, series, aa, issueDate, products) {
+function xmlAPY(vatNumber, series, aa, customerData, products, invoiceType) {
   let invoiceDetailsXML = "";
   let totalNetValue = 0;
   let totalVatAmount = 0;
 
+  const fpa = [
+    { value: "0", code: "7" },
+    { value: "3", code: "9" },
+    { value: "4", code: "6" },
+    { value: "6", code: "3" },
+    { value: "9", code: "5" },
+    { value: "13", code: "2" },
+    { value: "17", code: "5" },
+    { value: "24", code: "1" },
+  ];
+
+  console.log("afm:", vatNumber);
+
   products.forEach((product, index) => {
-    totalNetValue += product.netValue;
-    totalVatAmount += product.vatAmount;
+    totalNetValue += parseFloat(product.price);
+    totalVatAmount +=
+      parseFloat(product.final_price) - parseFloat(product.price);
+
+    const fpaCode = fpa.find((item) => item.value == product.fpa)?.code || "";
 
     invoiceDetailsXML += `
           <invoiceDetails>
               <lineNumber>${index + 1}</lineNumber>
-              <netValue>${product.netValue}</netValue>
-              <vatCategory>${product.vatCategory}</vatCategory>
-              <vatAmount>${product.vatAmount}</vatAmount>
+              <netValue>${product.price}</netValue>
+              <vatCategory>${fpaCode}</vatCategory>
+              <vatAmount>${(
+                parseFloat(product.final_price) - parseFloat(product.price)
+              ).toFixed(2)}</vatAmount>
               <incomeClassification>
                   <icls:classificationCategory>category1_95</icls:classificationCategory>
-                  <icls:amount>${product.netValue}</icls:amount>
+                  <icls:amount>${product.price}</icls:amount>
               </incomeClassification>
           </invoiceDetails>
       `;
@@ -37,8 +55,8 @@ function xmlAPY(vatNumber, series, aa, issueDate, products) {
           <invoiceHeader>
               <series>${series}</series>
               <aa>${aa}</aa>
-              <issueDate>${issueDate}</issueDate>
-              <invoiceType>11.2</invoiceType>
+              <issueDate>${customerData.date}</issueDate>
+              <invoiceType>${invoiceType}</invoiceType>
               <currency>EUR</currency>
           </invoiceHeader>
           <paymentMethods>
@@ -51,7 +69,7 @@ function xmlAPY(vatNumber, series, aa, issueDate, products) {
           ${invoiceDetailsXML}
           <invoiceSummary>
               <totalNetValue>${totalNetValue}</totalNetValue>
-              <totalVatAmount>${totalVatAmount}</totalVatAmount>
+              <totalVatAmount>${totalVatAmount.toFixed(2)}</totalVatAmount>
               <totalWithheldAmount>0.00</totalWithheldAmount>
               <totalFeesAmount>0.00</totalFeesAmount>
               <totalStampDutyAmount>0.00</totalStampDutyAmount>
