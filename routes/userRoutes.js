@@ -5,6 +5,7 @@ router.get("/", controller.user.getAll);
 router.get("/:username", controller.user.getUsername);
 router.get("/userData/:id", controller.user.findUserData);
 router.get("/aadeData/:id", controller.user.getAadeData);
+router.get("/getDailyTotalPrice/:id", controller.user.getDailyTotalPrice);
 router.post("/register", controller.user.createNew);
 router.post("/login", controller.user.login);
 router.post("/createUserData/:id", controller.user.insertUserData);

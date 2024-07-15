@@ -1,5 +1,6 @@
 const model = require("../models/index");
 const { Op, where } = require("sequelize");
+const sequelize = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../generic/emailFunc");
@@ -279,6 +280,27 @@ controller.getAadeData = async function (req, res) {
     return res.status(200).json({ message: "success", data: aadeData });
   } catch (error) {
     res.status(500).json({ message: error });
+  }
+};
+
+controller.getDailyTotalPrice = async function (req, res) {
+  try {
+    const userId = req.params.id;
+    const dailyTotals = await model.invoice.findAll({
+      attributes: [
+        [sequelize.fn("DATE", sequelize.col("published_date")), "date"],
+        [sequelize.fn("SUM", sequelize.col("total_price")), "total_price"],
+      ],
+      where: { userId: userId },
+      group: [sequelize.fn("DATE", sequelize.col("published_date"))],
+      order: [sequelize.fn("DATE", sequelize.col("published_date"))],
+    });
+
+    return res.status(200).json(dailyTotals);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error fetching daily totals: " + error.message });
   }
 };
 

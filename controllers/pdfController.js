@@ -217,8 +217,8 @@ controller.createInvoice = async function (req, res) {
 
 controller.cancelInvoice = async function (req, res) {
   try {
-    const response = await cancelInvoice(req.params.mark);
-    return res.status(200).json({ message: "Success", data: response });
+    const response = await cancelInvoice(req.params.id, req.params.mark);
+    return res.status(response.status).json({ data: response });
   } catch (error) {
     return res
       .status(500)
@@ -253,18 +253,32 @@ controller.getAllInvoicesByUserId = async function (req, res) {
 
 controller.getMaxSerialNumberBySerieAndUserId = async function (req, res) {
   try {
-    // Find the maximum serial_number for the given invoice_serie and userId
-    const maxSerialNumber = await model.invoice.max("serial_number", {
+    // Find all serial_numbers for the given invoice_serie and userId
+    const invoices = await model.invoice.findAll({
+      attributes: ["serial_number"],
       where: {
         invoice_serie: req.body.serie,
         userId: req.params.id,
       },
     });
 
+    // Check if invoices are found
+    if (!invoices || invoices.length === 0) {
+      return res.status(404).json({
+        error: "No serial numbers found for the given serie and userId",
+      });
+    }
+
+    // Find the maximum serial number from the fetched records
+    const maxSerialNumber = invoices.reduce((max, invoice) => {
+      return Math.max(max, parseInt(invoice.serial_number, 10));
+    }, -Infinity);
+
+    // Return the max serial number
     return res.status(200).json({ message: "success", data: maxSerialNumber });
   } catch (error) {
-    console.error("Error fetching max serial_number: ", error);
-    throw error;
+    console.error("Error fetching max serial number:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -348,6 +362,27 @@ controller.getAfmByInvoiceMark = async function (req, res) {
     return res
       .status(500)
       .json({ message: "Error fetching afm", error: error.message });
+  }
+};
+
+controller.getDailyTotalPrice = async function (req, res) {
+  try {
+    const userId = req.params.id;
+    const dailyTotals = await model.invoice.findAll({
+      attributes: [
+        [sequelize.fn("DATE", sequelize.col("published_date")), "date"],
+        [sequelize.fn("SUM", sequelize.col("total_price")), "total_price"],
+      ],
+      where: { userId: userId },
+      group: [sequelize.fn("DATE", sequelize.col("published_date"))],
+      order: [sequelize.fn("DATE", sequelize.col("published_date"))],
+    });
+
+    return res.status(200).json(dailyTotals);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error fetching daily totals: " + error.message });
   }
 };
 

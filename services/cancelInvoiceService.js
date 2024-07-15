@@ -3,11 +3,12 @@ const xml2js = require("xml2js");
 const he = require("he");
 const { getHeaders } = require("../generic/getAadeHeaders");
 
-const cancelInvoice = async (invoiceMark) => {
+const cancelInvoice = async (id, invoiceMark) => {
   try {
     const { username, subscription_key } = await getHeaders(id);
     const response = await axios.post(
-      process.env.CANCEL_INVOICE_MY_DATA + "mark=" + invoiceMark,
+      process.env.CANCEL_INVOICE_MY_DATA + "?" + "mark=" + invoiceMark,
+      null, // No data being sent in the body, hence null
       {
         headers: {
           "Content-Type": "application/xml",
@@ -19,11 +20,8 @@ const cancelInvoice = async (invoiceMark) => {
     );
 
     const xml = response.data;
-    console.log("Original response data:", response.data);
-
     // Decode HTML entities
     const decodedXml = he.decode(xml);
-    console.log("Decoded XML:", decodedXml);
 
     // Parse the decoded XML
     return new Promise((resolve, reject) => {
