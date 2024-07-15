@@ -1,4 +1,12 @@
-function xmlAPY(vatNumber, series, aa, customerData, products, invoiceType) {
+function xmlAPY(
+  vatNumber,
+  series,
+  aa,
+  customerData,
+  products,
+  invoiceType,
+  date
+) {
   let invoiceDetailsXML = "";
   let totalNetValue = 0;
   let totalVatAmount = 0;
@@ -55,7 +63,7 @@ function xmlAPY(vatNumber, series, aa, customerData, products, invoiceType) {
           <invoiceHeader>
               <series>${series}</series>
               <aa>${aa}</aa>
-              <issueDate>${customerData.date}</issueDate>
+              <issueDate>${date}</issueDate>
               <invoiceType>${invoiceType}</invoiceType>
               <currency>EUR</currency>
           </invoiceHeader>

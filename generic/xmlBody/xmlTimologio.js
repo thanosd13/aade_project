@@ -5,7 +5,8 @@ function xmlTimologio(
   customerData,
   products,
   invoiceType,
-  invoice_mark
+  invoice_mark,
+  date
 ) {
   let invoiceDetailsXML = "";
   let totalNetValue = 0;
@@ -77,8 +78,6 @@ function xmlTimologio(
                 <vatAmount>${(
                   parseFloat(product.final_price) - parseFloat(product.price)
                 ).toFixed(2)}</vatAmount>
-                <otherTaxesPercentCategory>18</otherTaxesPercentCategory>
-                <otherTaxesAmount></otherTaxesAmount>
                 <incomeClassification>
                     <icls:classificationType>${classificationType}</icls:classificationType>
                     <icls:classificationCategory>${classificationCategory}</icls:classificationCategory>
@@ -115,7 +114,7 @@ function xmlTimologio(
             <invoiceHeader>
                 <series>${series}</series>
                 <aa>${aa}</aa>
-                <issueDate>${customerData.date}</issueDate>
+                <issueDate>${date}</issueDate>
                 <invoiceType>${invoiceType}</invoiceType>
                 <currency>EUR</currency>
                 ${correlatedInvoices}

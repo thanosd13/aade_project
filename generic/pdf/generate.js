@@ -1,7 +1,6 @@
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const path = require("path");
-const imagePath = path.join(__dirname, "Pngtree_wolf logo_2306634.png");
 const fontPath = path.join(
   __dirname,
   "../../assets/fonts/OpenSans-Regular.ttf"
@@ -23,8 +22,23 @@ const paymentWayMapping = {
 };
 
 const invoiceTypeMapping = {
-  1: "Τιμολόγιο πώλησης",
-  2: "Απόδειξη",
+  1.1: "Τιμολόγιο πώλησης",
+  1.2: "Τιμολόγιο Πώλησης / Ενδοκοινοτικές Παραδόσεις",
+  1.3: "Τιμολόγιο Πώλησης / Παραδόσεις Τρίτων Χωρών",
+  1.4: "Τιμολόγιο Πώλησης / Πώληση για Λογαριασμό Τρίτων",
+  1.5: "Τιμολόγιο Πώλησης / Εκκαθάριση Πωλήσεων Τρίτων - Αμοιβή από Πωλήσεις Τρίτων",
+  1.6: "Τιμολόγιο Πώλησης / Συμπληρωματικό Παραστατικό",
+  2.1: "Τιμολόγιο Παροχής",
+  2.2: "Τιμολόγιο Παροχής / Ενδοκοινοτική Παροχή Υπηρεσιών",
+  2.3: "Τιμολόγιο Παροχής / Παροχή Υπηρεσιών σε λήπτη Τρίτης Χώρας",
+  2.4: "Τιμολόγιο Παροχής / Συμπληρωματικό Παραστατικό",
+  5.1: "Πιστωτικό Τιμολόγιο / Συσχετιζόμενο",
+  5.2: "Πιστωτικό Τιμολόγιο / Μη Συσχετιζόμενο",
+  6.1: "Στοιχείο Αυτοπαράδοσης",
+  6.2: "Στοιχείο Ιδιοχρησιμοποίησης",
+  7.1: "Συμβόλαιο - Έσοδο",
+  8.1: "Ενοίκια - Έσοδο",
+  11.2: "ΑΠΥ",
 };
 
 function createInvoice(invoice, callback) {
@@ -99,7 +113,7 @@ function generateCustomerInformation(doc, invoice) {
     .fontSize(14)
     .fillColor("#444444")
     .font(fontPathItalic)
-    .text(getCurrentDateFormatted(invoice.customerData.date), 50, 165, {
+    .text(getCurrentDateFormatted(invoice.informations.date), 50, 165, {
       align: "right",
     });
 
@@ -270,6 +284,15 @@ function generateFooter(doc, invoice) {
       width: 490,
       height: 60,
     });
+
+  // Add the QR code image
+  if (invoice.qrCodePng) {
+    doc.image(invoice.qrCodePng, doc.page.width - 100, footerPosition - 10, {
+      fit: [80, 80],
+      align: "center",
+      valign: "center",
+    });
+  }
 }
 
 function generateTableRow(

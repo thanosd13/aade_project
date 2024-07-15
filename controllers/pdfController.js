@@ -1,8 +1,9 @@
 const sequelize = require("sequelize"); // Import Sequelize
 const model = require("../models/index");
 const { createInvoice } = require("../generic/pdf/generate");
+const { cancelInvoice } = require("../services/cancelInvoiceService");
 const { sendInvoice } = require("../services/sendInvoiceService");
-const { dash } = require("pdfkit");
+const { generateQrCode } = require("../generic/generateQrCode");
 
 const controller = {};
 
@@ -129,6 +130,42 @@ controller.createInvoice = async function (req, res) {
       next();
     }
 
+    const newInvoice = await model.invoice.create({
+      cutsomer_name: customerData.name,
+      published_date: informations.date,
+      afm: customerData.afm,
+      invoice_type: informations.invoice_type,
+      price: totalPrice.toFixed(2),
+      fpa: totalFpa.toFixed(2),
+      total_price: totalFinalPrice.toFixed(2),
+      my_data_code: informations.my_data,
+      invoice_serie: informations.invoice_serie,
+      serial_number: informations.serial_number,
+      userId: userId,
+    });
+
+    let qrCodePng;
+    if (informations.my_data) {
+      const sendInvoiceResponse = await sendInvoice(
+        newInvoice.id,
+        userId,
+        userData[0].afm,
+        informations.invoice_serie,
+        informations.serial_number,
+        customerData,
+        products,
+        informations.invoice_type,
+        informations.invoice_mark,
+        informations.date
+      );
+      console.log("check!", sendInvoiceResponse.data.dataValues.qr_url);
+
+      // Generate the QR code PNG
+      qrCodePng = await generateQrCode(
+        sendInvoiceResponse.data.dataValues.qr_url
+      );
+    }
+
     const invoice = {
       userData: userData[0].dataValues,
       pdfTemplateData: pdfTemplateData.dataValues,
@@ -139,50 +176,17 @@ controller.createInvoice = async function (req, res) {
         products,
       },
       informations: informations,
+      qrCodePng, // Include the QR code PNG buffer
     };
 
     createInvoice(invoice, async (pdfData) => {
       if (!only_view) {
         try {
-          const newInvoice = await model.invoice.create({
-            cutsomer_name: customerData.name,
-            published_date: customerData.date,
-            afm: customerData.afm,
-            invoice_type: informations.invoice_type,
-            price: totalPrice.toFixed(2),
-            fpa: totalFpa.toFixed(2),
-            total_price: totalFinalPrice.toFixed(2),
-            my_data_code: informations.my_data,
-            invoice_serie: informations.invoice_serie,
-            serial_number: informations.serial_number,
-            userId: userId,
-          });
-
           await model.invoicePdf.create({
             invoice_id: newInvoice.id,
             pdf_data: pdfData,
+            qr_code_png: qrCodePng, // Store the QR code PNG if needed
           });
-
-          if (informations.my_data) {
-            const sendInvoiceResponse = await sendInvoice(
-              newInvoice.id,
-              userId,
-              invoice.userData.afm,
-              informations.invoice_serie,
-              informations.serial_number,
-              customerData,
-              products,
-              informations.invoice_type,
-              informations.invoice_mark
-            );
-
-            res.setHeader(
-              "Content-Disposition",
-              "attachment; filename=invoice.pdf"
-            );
-            res.setHeader("Content-Type", "application/pdf");
-            return res.status(sendInvoiceResponse.status).send(pdfData);
-          }
 
           res.setHeader(
             "Content-Disposition",
@@ -211,13 +215,34 @@ controller.createInvoice = async function (req, res) {
   }
 };
 
+controller.cancelInvoice = async function (req, res) {
+  try {
+    const response = await cancelInvoice(req.params.mark);
+    return res.status(200).json({ message: "Success", data: response });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error cancel invoice", error: error.message });
+  }
+};
+
 controller.getAllInvoicesByUserId = async function (req, res) {
   try {
     const invoices = await model.invoice.findAll({
       where: { userId: req.params.id },
+      include: [
+        {
+          model: model.myDataNewInvoice,
+          attributes: ["invoice_mark"], // Include only the invoice_mark field from myDataNewInvoiceModel
+        },
+      ],
     });
+
+    // Set headers for PDF download
     res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
     res.setHeader("Content-Type", "application/pdf");
+
+    // Return the invoices in the response
     res.status(200).json(invoices);
   } catch (error) {
     res

@@ -4,7 +4,8 @@ function xmlTimologio(
   aa,
   customerData,
   products,
-  invoiceType
+  invoiceType,
+  date
 ) {
   let invoiceDetailsXML = "";
   let totalNetValue = 0;
@@ -91,7 +92,7 @@ function xmlTimologio(
                 <invoiceHeader>
                     <series>${series}</series>
                     <aa>${aa}</aa>
-                    <issueDate>${customerData.date}</issueDate>
+                    <issueDate>${date}</issueDate>
                     <invoiceType>${invoiceType}</invoiceType>
                     <currency>EUR</currency>
                 </invoiceHeader>

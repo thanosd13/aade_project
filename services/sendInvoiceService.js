@@ -16,7 +16,8 @@ const sendInvoice = async (
   customerData,
   products,
   invoiceType,
-  invoice_mark
+  invoice_mark,
+  date
 ) => {
   let xmlRequest = {};
 
@@ -27,7 +28,8 @@ const sendInvoice = async (
       serial_number,
       customerData,
       products,
-      invoiceType
+      invoiceType,
+      date
     );
   } else if (
     invoiceType == "1.1" ||
@@ -50,7 +52,8 @@ const sendInvoice = async (
       customerData,
       products,
       invoiceType,
-      invoice_mark
+      invoice_mark,
+      date
     );
   } else if (
     invoiceType == "1.2" ||
@@ -64,7 +67,8 @@ const sendInvoice = async (
       serial_number,
       customerData,
       products,
-      invoiceType
+      invoiceType,
+      date
     );
   }
   try {

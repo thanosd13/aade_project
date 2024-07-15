@@ -23,6 +23,7 @@ router.put(
   controller.pdfController.updatePdfTemplateData
 );
 router.get("/:id", controller.pdfController.getPdfTemplateDataByUserId);
+router.get("/cancelInvoice/:mark", controller.pdfController.cancelInvoice);
 router.get("/image/:id", controller.pdfController.getImageByUserId);
 router.get("/invoices/:id", controller.pdfController.getAllInvoicesByUserId);
 router.get("/series/:id", controller.pdfController.getInvoiceSeriesByUserId);
