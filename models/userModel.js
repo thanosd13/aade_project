@@ -3,7 +3,7 @@ const db = require("../config/database");
 var user = db.define(
   "user",
   {
-    id: { type: sequelize.INTEGER, primaryKey: true },
+    id: { type: sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     username: { type: sequelize.STRING, unique: true },
     password: { type: sequelize.STRING },
     role: { type: sequelize.ENUM, values: ["user", "admin"] },

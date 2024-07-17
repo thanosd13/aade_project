@@ -264,8 +264,8 @@ controller.getMaxSerialNumberBySerieAndUserId = async function (req, res) {
 
     // Check if invoices are found
     if (!invoices || invoices.length === 0) {
-      return res.status(404).json({
-        error: "No serial numbers found for the given serie and userId",
+      return res.status(200).json({
+        message: "No serial numbers found for the given serie and userId",
       });
     }
 
