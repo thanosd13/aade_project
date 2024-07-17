@@ -126,9 +126,6 @@ controller.createInvoice = async function (req, res) {
     const pdfTemplateData = await model.pdfData.findOne({
       where: { userId: req.params.id },
     });
-    if (!pdfTemplateData || !pdfTemplateData.logoImage) {
-      next();
-    }
 
     const newInvoice = await model.invoice.create({
       cutsomer_name: customerData.name,
