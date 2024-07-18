@@ -155,7 +155,6 @@ controller.createInvoice = async function (req, res) {
         informations.invoice_mark,
         informations.date
       );
-      console.log("check!", sendInvoiceResponse.data.dataValues.qr_url);
 
       // Generate the QR code PNG
       qrCodePng = await generateQrCode(
